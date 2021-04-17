@@ -11,14 +11,14 @@
 typedef unsigned char BYTE;
 
 typedef struct matrix {
-  int dimx;
-  int dimy;
-  float data[][];
+  int dimrow;
+  int dimcol;
+  float * data;
 } matrix;
 
 typedef struct matrix_set {
   int number_of_matrices;
-  matrixes ** set;
-} matrix;
+  matrix set[];
+} matrix_set;
 
 #endif

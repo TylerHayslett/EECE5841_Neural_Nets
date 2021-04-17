@@ -13,11 +13,13 @@ extern int SIZEX;
 extern int SIZEY;
 
 // Read from data file and write to pgm
-int imageread(char s[], BYTE ** image_char, int index);
-int imagewrite(char s[], BYTE * image_char);
+int imageread(char s[], matrix * result, int index);
+int imagewrite(char s[], matrix * image_matrix);
 
 // Read label for image from label file
 char labelread(char s[], int index);
+
+
 
 #endif
 
