@@ -1,0 +1,24 @@
+// Tyler Hayslett
+// 2021-03-22
+#ifndef common_deffs
+#define common_deffs
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+typedef unsigned char BYTE;
+
+typedef struct matrix {
+  int dimx;
+  int dimy;
+  float data[][];
+} matrix;
+
+typedef struct matrix_set {
+  int number_of_matrices;
+  matrixes ** set;
+} matrix;
+
+#endif
