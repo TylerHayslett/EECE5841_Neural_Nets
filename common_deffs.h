@@ -11,8 +11,8 @@
 typedef unsigned char BYTE;
 
 typedef struct matrix {
-  int dimrow;
-  int dimcol;
+  int row_cnt;
+  int col_cnt;
   float * data;
 } matrix;
 

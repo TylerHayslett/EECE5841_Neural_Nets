@@ -25,8 +25,8 @@ int imageread(char s[], matrix * result, int index) {
     image_data[i] = (float) image_char[i];
   }
   
-  result->dimrow = SIZEX;
-  result->dimcol = SIZEY;
+  result->col_cnt = SIZEX;
+  result->row_cnt = SIZEY;
   result->data = image_data;
   
   printf("assigned data\n");
@@ -41,7 +41,7 @@ int imagewrite(char s[], matrix * image_matrix) {
   FILE *iFile = fopen(s,"w");
   if(iFile==0) return 1; 
   
-  int num_elements = image_matrix->dimrow * image_matrix->dimcol;
+  int num_elements = image_matrix->col_cnt * image_matrix->row_cnt;
   
   // Normalize matrix
   int i;
@@ -66,7 +66,7 @@ int imagewrite(char s[], matrix * image_matrix) {
   }
   
   // Write pgm header
-  fprintf(iFile, "P5 %d %d %d ",image_matrix->dimrow,image_matrix->dimcol,255);
+  fprintf(iFile, "P5 %d %d %d ",image_matrix->col_cnt,image_matrix->row_cnt,255);
   
   // Write image data
   fwrite(image_char, sizeof(unsigned char), num_elements, iFile);
