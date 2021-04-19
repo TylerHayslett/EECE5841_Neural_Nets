@@ -9,70 +9,117 @@
 
 matrix * make_expected(int label){
   matrix * expected = new_matrix(10,1);
-  //expected->data[(int)label] = 1;
-  if (label > 4) {
-    expected->data[1] = 1;
-  } else {
-    expected->data[0] = 1;
-  }
+  
+  expected->data[(int)label] = 1;
   
   return expected;
 }
+matrix * make_test_data(int label){
+  matrix * test_data = new_matrix(10,1);
+  test_data->data[(int)label] = 1;
+  
+  return test_data;
+}
 
-
-
-int main(int argc, char *argv[]){  
+void eval_network(int total_layers){
+  
+  char * test_data   = "train_test_data/t10k-images-idx3-ubyte";
+  char * test_label  = "train_test_data/t10k-labels-idx1-ubyte";
+  
   int index = 0;
   char current_label = 0;
-  matrix image1; //image array
-  char * train_data  = "train_test_data/train-images-idx3-ubyte";
-  char * train_label = "train_test_data/train-labels-idx1-ubyte";
-  //char * test_data   = "train_test_data/t10k-images-idx3-ubyte";
-  //char * test_label  = "train_test_data/t10k-labels-idx1-ubyte";
+  float scale = (float)1/256;
   
-  index = atoi(argv[1]);
+  matrix * accum_num = new_matrix(10,1);
+  matrix * accum_est = new_matrix(10,1);
   
-  int total_layers = 4;
-  int learning_rate = 5;
-  
-  setup_network(28*28,total_layers-1,15,10,1);
-  
-  printf("Network setup\n");
-  
-  int i,k;
-  for(i = 0; i < 60000; i++){
-    imageread(train_data, &image1, i);
-    current_label = labelread(train_label, i);
+  int i;
+  for(i = 0; i < 1000; i++){
+    matrix * image = malloc(sizeof(matrix*));
     
-    matrix * norm_set = scale_matrix(&image1, 1/256);
+    imageread(test_data, image, 6+i);
+    current_label = labelread(test_label, 6+i);
+    
     matrix * expected = make_expected((int)current_label);
     
-    train(norm_set, expected, total_layers-1,learning_rate);
+    matrix * norm_set = scale_matrix(image, scale); 
     
+    classify_image(norm_set);
+    free_matrix(norm_set);
+    
+    matrix * estimate = hadamard_matrix(ACTIVATIONS->set[total_layers], expected);
+    
+    int k;
+    for(k = 0; k < 10; k++){
+      accum_num->data[k] = accum_num->data[k] + expected->data[k];
+      accum_est->data[k] = accum_est->data[k] + estimate->data[k];
+    }
+    free_matrix(estimate);
+    free_matrix(expected);
+    free_matrix(image);
+  }
+  
+  //print_matrix(accum_est);
+  //print_matrix(accum_num);
+  
+  for(i = 0; i < 10; i++){
+    accum_est->data[i] = accum_est->data[i] / accum_num->data[i];
+  }
+  
+  print_matrix(accum_est);
+  
+  
+}
+
+
+void train_network(float learning_rate, int total_layers){
+  char * train_data  = "train_test_data/train-images-idx3-ubyte";
+  char * train_label = "train_test_data/train-labels-idx1-ubyte";
+  
+  char current_label = 0;
+  float scale = (float)1/256;
+  float adj_rate = learning_rate;
+  adj_rate = adj_rate / 39.0;
+  
+  int i;
+  for(i = 0; i < 60000; i++){
+    
+    matrix * image = malloc(sizeof(matrix*));
+    
+    imageread(train_data, image, i);
+    current_label = labelread(train_label, i);
+    
+    matrix * norm_set = scale_matrix(image, scale); 
+    matrix * expected = make_expected((int)current_label);
+    
+    back_propogate(norm_set, expected);
+    if((i % 40) == 39){
+      train(total_layers, adj_rate);
+      //adj_rate = adj_rate * 0.999;
+      eval_network(total_layers);
+      printf("%d\n",i);
+      printf("%f\n",adj_rate);
+    }
+    
+    free_matrix(image);
     free_matrix(norm_set);
     free_matrix(expected);
   }
+  eval_network(total_layers);
+}
+
+
+int main(int argc, char *argv[]){  
+  
+  int total_layers = atoi(argv[1]);
+  int neurons_per_layer = atoi(argv[2]);
+  float learning_rate = atof(argv[3]);
   
   
+  setup_network(28*28,total_layers-1,neurons_per_layer,10);
+  printf("Network setup\n");
   
-  imageread(train_data, &image1, index);
-  current_label = labelread(train_label, index);
-  printf("%d\n", (int)current_label);
-  
-  matrix * expected = make_expected((int)current_label);
-  
-  print_matrix(expected);
-  
-  free_matrix(expected);
-  
-  matrix * norm_set = scale_matrix(&image1, 1/256);
-  classify_image(norm_set);
-  free_matrix(norm_set);
-  
-  printf("\n");
-  print_matrix(ACTIVATIONS->set[total_layers]);
-  
-  
+  train_network(learning_rate, total_layers);
   
   printf("Done\n");
   return 0;

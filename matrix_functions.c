@@ -53,6 +53,9 @@ matrix * sum_matrix(matrix * matrix_a, matrix * matrix_b){
       return result;
     }
   }
+  printf("Matrices different sizes, cant sum\n");
+  printf("%d %d\n", matrix_a->row_cnt, matrix_a->col_cnt);
+  printf("%d %d\n", matrix_b->row_cnt, matrix_b->col_cnt);
   return 0;
 }
 
@@ -68,7 +71,7 @@ matrix * dif_matrix(matrix * matrix_a, matrix * matrix_b){
       return result;
     }
   }
-  printf("Matrices different sizes\n");
+  printf("Matrices different sizes, cant dif\n");
   printf("%d %d\n", matrix_a->row_cnt, matrix_a->col_cnt);
   printf("%d %d\n", matrix_b->row_cnt, matrix_b->col_cnt);
   return 0;
@@ -93,6 +96,8 @@ matrix * mult_matrix(matrix * matrix_a, matrix * matrix_b){
     return result;
   } 
   printf("Matrix Multiplication failed, wrong sizes \n");
+  printf("%d %d\n", matrix_a->row_cnt, matrix_a->col_cnt);
+  printf("%d %d\n", matrix_b->row_cnt, matrix_b->col_cnt);
   return 0;
 }
 
@@ -109,6 +114,8 @@ matrix * hadamard_matrix(matrix * matrix_a, matrix * matrix_b){
     }
   }
   printf("Hadamard failed\n");
+  printf("%d %d\n", matrix_a->row_cnt, matrix_a->col_cnt);
+  printf("%d %d\n", matrix_b->row_cnt, matrix_b->col_cnt);
   return 0;
 }
 
@@ -167,4 +174,5 @@ void print_matrix(matrix * matrix_a){
     }
     printf("%f]\n",matrix_a->data[col + row*matrix_a->col_cnt]);
   }
+  printf("\n");
 }

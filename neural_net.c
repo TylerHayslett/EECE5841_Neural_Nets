@@ -15,7 +15,7 @@ matrix_set * WGRADIENT;
 matrix_set * BGRADIENT;
 
 // assuming input will be one single full length column
-void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size, float rand_range){
+void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size){
   int i;
   
   WEIGHTS = malloc(sizeof(matrix_set *));
@@ -42,6 +42,8 @@ void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_la
   WGRADIENT->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
   BGRADIENT->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
   
+  ACTIVATIONS->set[0] = new_matrix(input_size,1);
+  
   int in_width, out_width;
   for(i = 0; i < (number_of_hidden_layers + 1); i++){
     if (i == 0){
@@ -54,15 +56,15 @@ void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_la
     } else {
       out_width = nodes_per_layer;
     }
-    WEIGHTS->set[i] = rand_matrix(out_width,in_width,rand_range);
+    WEIGHTS->set[i] = rand_matrix(out_width,in_width,1/sqrt(in_width));
     BIASES->set[i] = new_matrix(out_width,1);
     Z_SUM->set[i] = new_matrix(out_width,1);
-    ACTIVATIONS->set[i] = new_matrix(out_width,1);
+    ACTIVATIONS->set[i+1] = new_matrix(out_width,1);
     ERRORS->set[i] = new_matrix(out_width,1);
     WGRADIENT->set[i] = new_matrix(out_width,in_width);
     BGRADIENT->set[i] = new_matrix(out_width,1);
   }
-  ACTIVATIONS->set[i] = new_matrix(out_width,1);
+  
 }
 
 
@@ -71,12 +73,8 @@ void back_propogate(matrix * image, matrix * expected){
   int num_layers = WEIGHTS->number_of_matrices;
   classify_image(image);
   
-  //printf("classified\n");
-  
   for(i = 0; i < num_layers; i++){
     free_matrix(ERRORS->set[num_layers - 1 - i]);
-    free_matrix(WGRADIENT->set[num_layers - 1 - i]);
-    free_matrix(BGRADIENT->set[num_layers - 1 - i]);
     if (i == 0){
       ERRORS->set[num_layers - 1 - i] = calc_output_error(ACTIVATIONS->set[num_layers - i], expected, Z_SUM->set[num_layers - 1 - i]);
     } else {
@@ -84,21 +82,36 @@ void back_propogate(matrix * image, matrix * expected){
     }
     
     matrix * AT = transpose_matrix(ACTIVATIONS->set[num_layers - 1 - i]);
-    WGRADIENT->set[num_layers - 1 - i] = mult_matrix(ERRORS->set[num_layers - 1 - i], AT);
-    BGRADIENT->set[i] = scale_matrix(ERRORS->set[num_layers - 1 - i], 1);
+    
+    matrix * Wgrad = mult_matrix(ERRORS->set[num_layers - 1 - i], AT);
+    matrix * Bgrad = scale_matrix(ERRORS->set[num_layers - 1 - i], 1);
+    
+    matrix * WGaccum = sum_matrix(Wgrad, WGRADIENT->set[num_layers - 1 - i]);
+    matrix * BGaccum = sum_matrix(Bgrad, BGRADIENT->set[num_layers - 1 - i]);
+    
+    free_matrix(Wgrad);
+    free_matrix(Bgrad);
+    free_matrix(WGRADIENT->set[num_layers - 1 - i]);
+    free_matrix(BGRADIENT->set[num_layers - 1 - i]);
+    
+    WGRADIENT->set[num_layers - 1 - i] = WGaccum;
+    BGRADIENT->set[num_layers - 1 - i] = BGaccum;
     free_matrix(AT);
   }
-  //printf("propogated\n");
 }
 
-void train(matrix * image, matrix * expected, int num_layers, int training_rate){
+void train(int num_layers, float training_rate){
   int k;
-  back_propogate(image, expected);
-  
   
   for(k = 0; k < num_layers; k++){
     matrix * WGscaled = scale_matrix(WGRADIENT->set[k],training_rate);
     matrix * BGscaled = scale_matrix(BGRADIENT->set[k],training_rate);
+    
+    free_matrix(WGRADIENT->set[k]);
+    free_matrix(BGRADIENT->set[k]);
+    
+    WGRADIENT->set[k] = new_matrix(WEIGHTS->set[k]->row_cnt, WEIGHTS->set[k]->col_cnt);
+    BGRADIENT->set[k] = new_matrix(BIASES->set[k]->row_cnt, BIASES->set[k]->col_cnt);
     
     matrix * Wdiffed = dif_matrix(WEIGHTS->set[k],WGscaled);
     matrix * Bdiffed = dif_matrix(BIASES->set[k],BGscaled);
@@ -134,7 +147,6 @@ void classify_image(matrix * image){
     matrix * WA = mult_matrix(WEIGHTS->set[i], ACTIVATIONS->set[i]);
     Z_SUM->set[i] = sum_matrix(WA, BIASES->set[i]);
     ACTIVATIONS->set[i+1] = sigmoid_matrix(Z_SUM->set[i]);
-      
     free_matrix(WA);
   }
   image->row_cnt = temp_row;
