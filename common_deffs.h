@@ -18,7 +18,7 @@ typedef struct matrix {
 
 typedef struct matrix_set {
   int number_of_matrices;
-  matrix set[];
+  matrix ** set;
 } matrix_set;
 
 #endif
