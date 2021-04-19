@@ -30,26 +30,18 @@ int main(int argc, char *argv[]){
   scale_matrix(&image1, 4);
   result = sum_matrix(&image1, &image2);
   
+  
+  matrix * rando = rand_matrix(3,8,1);
+  
+  matrix * randot = transpose_matrix(rando);
+  print_matrix(rando);
+  printf("\n");
+  print_matrix(randot);
+  
   printf("Writing image outputs\n");
   imagewrite("character.pgm", result);
   
   printf("Done\n");
-  
-  test1.col_cnt = 3;
-  test1.row_cnt = 1;
-  float data1[] = {3,4,2};
-  test1.data = data1;
-  
-  test2.col_cnt = 4;
-  test2.row_cnt = 3;
-  float data2[] = {13,9,7,15,8,7,4,6,6,4,0,3};
-  test2.data = data2;
-  
-  result2 = mult_matrix(&test1, &test2);
-  
-  printf("Result is %d by %d\n", result2->row_cnt, result2->col_cnt);
-  printf("[%f,%f]\n", result2->data[0], result2->data[1]);
-  printf("[%f,%f]\n", result2->data[2], result2->data[3]);
   return 0;
   
 }

@@ -19,8 +19,6 @@ int imageread(char s[], matrix * result, int index) {
   fread(image_char,sizeof(BYTE),SIZEX*SIZEY,iFile);
   fclose(iFile);
   
-  printf("opened file\n");
-  
   for (i = 0; i < SIZEX*SIZEY; i++) {
     image_data[i] = (float) image_char[i];
   }
@@ -28,8 +26,6 @@ int imageread(char s[], matrix * result, int index) {
   result->col_cnt = SIZEX;
   result->row_cnt = SIZEY;
   result->data = image_data;
-  
-  printf("assigned data\n");
   
   free(image_char);
   
@@ -85,8 +81,6 @@ char labelread(char s[], int index) {
   fseek(iFile, (4*2) + (index), SEEK_SET);
   char label = (char) fgetc(iFile);
   fclose(iFile);
-  
-  printf("label read\n");
   
   return label;
 }
