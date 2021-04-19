@@ -34,11 +34,11 @@ void eval_network(int total_layers){
   matrix * accum_est = new_matrix(10,1);
   
   int i;
-  for(i = 0; i < 1000; i++){
+  for(i = 0; i < 10000; i++){
     matrix * image = malloc(sizeof(matrix*));
     
-    imageread(test_data, image, 6+i);
-    current_label = labelread(test_label, 6+i);
+    imageread(test_data, image, i);
+    current_label = labelread(test_label, i);
     
     matrix * expected = make_expected((int)current_label);
     
@@ -79,7 +79,7 @@ void train_network(float learning_rate, int total_layers){
   char current_label = 0;
   float scale = (float)1/256;
   float adj_rate = learning_rate;
-  adj_rate = adj_rate / 39.0;
+  adj_rate = adj_rate / 10.0;
   
   int i;
   for(i = 0; i < 60000; i++){
@@ -93,10 +93,10 @@ void train_network(float learning_rate, int total_layers){
     matrix * expected = make_expected((int)current_label);
     
     back_propogate(norm_set, expected);
-    if((i % 40) == 39){
+    if((i % 10) == 9){
       train(total_layers, adj_rate);
       //adj_rate = adj_rate * 0.999;
-      eval_network(total_layers);
+      //eval_network(total_layers);
       printf("%d\n",i);
       printf("%f\n",adj_rate);
     }
