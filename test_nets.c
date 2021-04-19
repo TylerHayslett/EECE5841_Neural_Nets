@@ -7,6 +7,20 @@
 #include "matrix_functions.h"
 #include "neural_net.h"
 
+matrix * make_expected(int label){
+  matrix * expected = new_matrix(10,1);
+  //expected->data[(int)label] = 1;
+  if (label > 4) {
+    expected->data[1] = 1;
+  } else {
+    expected->data[0] = 1;
+  }
+  
+  return expected;
+}
+
+
+
 int main(int argc, char *argv[]){  
   int index = 0;
   char current_label = 0;
@@ -18,10 +32,10 @@ int main(int argc, char *argv[]){
   
   index = atoi(argv[1]);
   
-  imageread(train_data, &image1, index);
-  current_label = labelread(train_label, index);
+  int total_layers = 4;
+  int learning_rate = 5;
   
-  setup_network(28*28,1,10,10);
+  setup_network(28*28,total_layers-1,15,10,1);
   
   printf("Network setup\n");
   
@@ -29,43 +43,34 @@ int main(int argc, char *argv[]){
   for(i = 0; i < 60000; i++){
     imageread(train_data, &image1, i);
     current_label = labelread(train_label, i);
-    matrix * expected = new_matrix(10,1);
     
-    expected->data[(int)current_label] = 1;
+    matrix * norm_set = scale_matrix(&image1, 1/256);
+    matrix * expected = make_expected((int)current_label);
     
-    back_propogate(&image1, expected);
+    train(norm_set, expected, total_layers-1,learning_rate);
     
+    free_matrix(norm_set);
     free_matrix(expected);
-    
-    for(k = 0; k < 2; k++){
-      matrix * WGscaled = scale_matrix(WGRADIENT->set[k],0.01);
-      matrix * BGscaled = scale_matrix(BGRADIENT->set[k],0.01);
-      
-      matrix * Wdiffed = dif_matrix(WEIGHTS->set[k],WGscaled);
-      matrix * Bdiffed = dif_matrix(BIASES->set[k],BGscaled);
-      
-      free_matrix(WGscaled);
-      free_matrix(BGscaled);
-      free_matrix(WEIGHTS->set[k]);
-      free_matrix(BIASES->set[k]);
-      
-      WEIGHTS->set[k] = Wdiffed;
-      BIASES->set[k] = Bdiffed;
-      
-    }
-    
   }
-  classify_image(&image1);
+  
+  
+  
+  imageread(train_data, &image1, index);
+  current_label = labelread(train_label, index);
   printf("%d\n", (int)current_label);
   
-  matrix * expected = new_matrix(10,1);
-  expected->data[(int)current_label] = 1;
+  matrix * expected = make_expected((int)current_label);
+  
   print_matrix(expected);
-  printf("\n");
+  
   free_matrix(expected);
   
+  matrix * norm_set = scale_matrix(&image1, 1/256);
+  classify_image(norm_set);
+  free_matrix(norm_set);
   
-  print_matrix(ACTIVATIONS->set[2]);
+  printf("\n");
+  print_matrix(ACTIVATIONS->set[total_layers]);
   
   
   

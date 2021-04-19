@@ -19,7 +19,8 @@ extern matrix_set * WGRADIENT;
 extern matrix_set * BGRADIENT;
 
 // Higher level Neural Net functions
-void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size); // Initializes randomized weight and bias arrays for network
+void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size, float rand_range); // Initializes randomized weight and bias arrays for network
+void train(matrix * image, matrix * expected, int num_layers, int training_rate);                    // 
 void back_propogate(matrix * image, matrix * expected);           // Calculates the gradient matrices
 void classify_image(matrix * image);                              // Calculates the activations for the network
 

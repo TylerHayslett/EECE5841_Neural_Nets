@@ -15,7 +15,7 @@ matrix_set * WGRADIENT;
 matrix_set * BGRADIENT;
 
 // assuming input will be one single full length column
-void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size){
+void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size, float rand_range){
   int i;
   
   WEIGHTS = malloc(sizeof(matrix_set *));
@@ -54,7 +54,7 @@ void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_la
     } else {
       out_width = nodes_per_layer;
     }
-    WEIGHTS->set[i] = rand_matrix(out_width,in_width,1);
+    WEIGHTS->set[i] = rand_matrix(out_width,in_width,rand_range);
     BIASES->set[i] = new_matrix(out_width,1);
     Z_SUM->set[i] = new_matrix(out_width,1);
     ACTIVATIONS->set[i] = new_matrix(out_width,1);
@@ -90,6 +90,30 @@ void back_propogate(matrix * image, matrix * expected){
   }
   //printf("propogated\n");
 }
+
+void train(matrix * image, matrix * expected, int num_layers, int training_rate){
+  int k;
+  back_propogate(image, expected);
+  
+  
+  for(k = 0; k < num_layers; k++){
+    matrix * WGscaled = scale_matrix(WGRADIENT->set[k],training_rate);
+    matrix * BGscaled = scale_matrix(BGRADIENT->set[k],training_rate);
+    
+    matrix * Wdiffed = dif_matrix(WEIGHTS->set[k],WGscaled);
+    matrix * Bdiffed = dif_matrix(BIASES->set[k],BGscaled);
+    
+    free_matrix(WGscaled);
+    free_matrix(BGscaled);
+    free_matrix(WEIGHTS->set[k]);
+    free_matrix(BIASES->set[k]);
+    
+    WEIGHTS->set[k] = Wdiffed;
+    BIASES->set[k] = Bdiffed;
+  }
+}
+
+
 
 void classify_image(matrix * image){
   int i;
