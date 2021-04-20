@@ -66,9 +66,27 @@ void eval_network(int total_layers){
     accum_est->data[i] = accum_est->data[i] / accum_num->data[i];
   }
   
+  for(i = 0; i < 10; i++){
+    matrix * image = malloc(sizeof(matrix*));
+    imageread(test_data, image, i);
+    current_label = labelread(test_label, i);
+    matrix * norm_set = scale_matrix(image, scale); 
+    
+    if(i == 8){
+      imagewrite("example.pgm", image);
+    }
+    
+    
+    classify_image(norm_set);
+    
+    printf("%d\n",(int)current_label);
+    print_matrix(ACTIVATIONS->set[total_layers]);
+    
+    free_matrix(norm_set);
+    free_matrix(image);
+  }
+  
   print_matrix(accum_est);
-  
-  
 }
 
 
@@ -79,26 +97,26 @@ void train_network(float learning_rate, int total_layers){
   char current_label = 0;
   float scale = (float)1/256;
   float adj_rate = learning_rate;
-  adj_rate = adj_rate / 10.0;
+  adj_rate = adj_rate / 20.0;
   
-  int i;
-  for(i = 0; i < 60000; i++){
+  int i, index;
+  for(i = 0; i < 160000; i++){
     
     matrix * image = malloc(sizeof(matrix*));
     
-    imageread(train_data, image, i);
-    current_label = labelread(train_label, i);
+    index = (int)floor((((float)rand())/RAND_MAX) * 60000.0);
+    //printf("%d\n", index);
+    
+    imageread(train_data, image, index);
+    current_label = labelread(train_label, index);
     
     matrix * norm_set = scale_matrix(image, scale); 
     matrix * expected = make_expected((int)current_label);
     
-    back_propogate(norm_set, expected);
-    if((i % 10) == 9){
+    classify_image(norm_set);
+    back_propogate(expected);
+    if((i % 20) == 19){
       train(total_layers, adj_rate);
-      //adj_rate = adj_rate * 0.999;
-      //eval_network(total_layers);
-      printf("%d\n",i);
-      printf("%f\n",adj_rate);
     }
     
     free_matrix(image);

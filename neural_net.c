@@ -68,10 +68,9 @@ void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_la
 }
 
 
-void back_propogate(matrix * image, matrix * expected){
+void back_propogate(matrix * expected){
   int i;
   int num_layers = WEIGHTS->number_of_matrices;
-  classify_image(image);
   
   for(i = 0; i < num_layers; i++){
     free_matrix(ERRORS->set[num_layers - 1 - i]);

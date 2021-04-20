@@ -22,7 +22,7 @@ matrix * rand_matrix(int row_cnt, int col_cnt, float range){
   new_mat->data = malloc(row_cnt*col_cnt*sizeof(float));
   
   for(i = 0; i < row_cnt*col_cnt; i++){
-    new_mat->data[i] = ((2 * ((float)rand()) - RAND_MAX)/RAND_MAX) * range;;
+    new_mat->data[i] = ((2 * ((float)rand()) - RAND_MAX)/RAND_MAX) * range;
   }
   
   return new_mat;
