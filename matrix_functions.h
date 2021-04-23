@@ -35,7 +35,7 @@ void free_matrix(matrix * oldmatrix);
 void free_matrix_set(matrix_set * oldmatrix_set);
 
 // Matrix operation functions
-void rand_matrix(matrix * matrix_a float range);
+void rand_matrix(matrix * matrix_a, float range);
 void sum_matrix(matrix * result, matrix * matrix_a, matrix * matrix_b);
 void dif_matrix(matrix * result, matrix * matrix_a, matrix * matrix_b);
 void mult_matrix(matrix * result, matrix * matrix_a, matrix * matrix_b);

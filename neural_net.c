@@ -15,48 +15,34 @@ matrix_set * WGRADIENT;
 matrix_set * BGRADIENT;
 
 // assuming input will be one single full length column
-void setup_network(int input_size, int number_of_hidden_layers, int nodes_per_layer, int output_size){
+void setup_network(int input_size, int total_layers, int nodes_per_layer, int output_size){
   int i;
   
-  WEIGHTS = malloc(sizeof(matrix_set *));
-  BIASES = malloc(sizeof(matrix_set *));
-  Z_SUM  = malloc(sizeof(matrix_set *));
-  ACTIVATIONS = malloc(sizeof(matrix_set *));
-  ERRORS = malloc(sizeof(matrix_set *));
-  WGRADIENT   = malloc(sizeof(matrix_set *));
-  BGRADIENT = malloc(sizeof(matrix_set *));
-  
-  WEIGHTS->number_of_matrices = (number_of_hidden_layers + 1);
-  BIASES->number_of_matrices = (number_of_hidden_layers + 1);
-  Z_SUM->number_of_matrices = (number_of_hidden_layers + 1);
-  ACTIVATIONS->number_of_matrices = (number_of_hidden_layers + 2);
-  ERRORS->number_of_matrices = (number_of_hidden_layers + 1);
-  WGRADIENT->number_of_matrices = (number_of_hidden_layers + 1);
-  BGRADIENT->number_of_matrices = (number_of_hidden_layers + 1);
-  
-  WEIGHTS->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
-  BIASES->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
-  Z_SUM->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
-  ACTIVATIONS->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 2));
-  ERRORS->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
-  WGRADIENT->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
-  BGRADIENT->set = malloc(sizeof(matrix *)*(number_of_hidden_layers + 1));
+  WEIGHTS     = new_matrix_set(total_layers);
+  BIASES      = new_matrix_set(total_layers);
+  Z_SUM       = new_matrix_set(total_layers);
+  ACTIVATIONS = new_matrix_set(total_layers + 1);
+  ERRORS      = new_matrix_set(total_layers);
+  WGRADIENT   = new_matrix_set(total_layers);
+  BGRADIENT   = new_matrix_set(total_layers);
   
   ACTIVATIONS->set[0] = new_matrix(input_size,1);
   
   int in_width, out_width;
-  for(i = 0; i < (number_of_hidden_layers + 1); i++){
+  for(i = 0; i < (total_layers); i++){
     if (i == 0){
       in_width = input_size;
     } else {
       in_width = nodes_per_layer;
     }
-    if (i == number_of_hidden_layers){
+    if (i == (total_layers - 1)){
       out_width = output_size;
     } else {
       out_width = nodes_per_layer;
     }
-    WEIGHTS->set[i] = rand_matrix(out_width,in_width,1/sqrt(in_width));
+    WEIGHTS->set[i] = new_matrix(out_width,in_width);
+    rand_matrix(WEIGHTS->set[i],1/sqrt(in_width));
+    
     BIASES->set[i] = new_matrix(out_width,1);
     Z_SUM->set[i] = new_matrix(out_width,1);
     ACTIVATIONS->set[i+1] = new_matrix(out_width,1);
