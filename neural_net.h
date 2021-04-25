@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "common_deffs.h"
+#include "common.h"
 #include "matrix_functions.h"
 
 extern matrix_set * WEIGHTS;
@@ -25,7 +25,7 @@ void back_propogate(matrix * expected);           // Calculates the gradient mat
 void classify_image(matrix * image);                              // Calculates the activations for the network
 
 // Lower level Neural Net functions
-matrix * calc_output_error(matrix * activations, matrix * required, matrix * Z);
-matrix * calc_hidden_error(matrix * prev_error, matrix * prev_weights, matrix * Z);
+void calc_output_error(matrix * calc_error, matrix * activations, matrix * required, matrix * Z);
+void calc_hidden_error(matrix * calc_error, matrix * prev_error, matrix * prev_weights, matrix * Z);
 
 #endif

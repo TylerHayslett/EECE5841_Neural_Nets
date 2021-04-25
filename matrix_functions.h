@@ -22,12 +22,6 @@ typedef struct matrix_set {
   matrix ** set;
 } matrix_set;
 
-
-// Read from data file and write to pgm
-int imageread(char s[], matrix * result, int index);
-int imagewrite(char s[], matrix * image_matrix);
-
-
 // Matrix creation/deletion functions
 matrix * new_matrix(int row_cnt, int col_cnt);
 matrix_set * new_matrix_set(int size_of_set);

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "image_functions.h"
 #include "matrix_functions.h"
 
 // Matrix functions
@@ -39,7 +38,7 @@ void free_matrix_set(matrix_set * oldmatrix_set){
 
 void rand_matrix(matrix * matrix_a, float range){
   int i;
-  for(i = 0; i < matrix_a->row_cnt * matrix_a->col_cnt; i++){
+  for(i = 0; i < (matrix_a->row_cnt * matrix_a->col_cnt); i++){
     matrix_a->data[i] = ((2 * ((float)rand()) - RAND_MAX)/RAND_MAX) * range;
   }
 }

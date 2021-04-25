@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "common_deffs.h"
+#include "common.h"
 
 extern int SIZEX; 
 extern int SIZEY;
