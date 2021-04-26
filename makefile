@@ -1,10 +1,7 @@
 all: test_nets 
 	
-test_nets: test_nets.o common.o matrix_functions.o neural_net.o
-	gcc -g -Wall -o test_nets test_nets.o common.o matrix_functions.o neural_net.o -lm -g
-
-common.o: common.c common.h
-	gcc -g -Wall -c common.c
+test_nets: test_nets.o matrix_functions.o neural_net.o
+	gcc -g -Wall -o test_nets test_nets.o matrix_functions.o neural_net.o -lm -g
 	
 matrix_functions.o: matrix_functions.c matrix_functions.h common.h
 	gcc -g -Wall -c matrix_functions.c

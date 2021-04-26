@@ -53,122 +53,154 @@ void make_expected(matrix * expected, int label){
   expected->data[(int)label] = 1;
 }
 
-int estimate_index(matrix * estimated, ){
-  get_sample();
-  classify_image(norm_set);
-  back_propogate(expected);
+float calc_cost(matrix * expected, matrix * estimated){
+  float cost = 0;
+  for(int i = 0; i < 10; i++){
+    cost += 0.5 * (expected->data[i] - estimated->data[i]) * (expected->data[i] - estimated->data[i]);
+  }
   
+  return cost;
+}
+
+matrix * estimate_index(matrix * expected, BYTE * datum, BYTE * labels, int index){
+  
+  data_sample * cur_sample = malloc(sizeof(data_sample));
+  cur_sample->values = new_matrix(28*28,1);
+  
+  get_sample(cur_sample, datum, labels, index);
+  
+  matrix * estimated = classify_image(cur_sample->values);
+  
+  make_expected(expected, cur_sample->label);
+  
+  free_matrix(cur_sample->values);
+  free(cur_sample);
+  
+  return estimated;
 }
 
 
-void eval_network(int total_layers){
+matrix * eval_network(int total_layers){
   
   char * test_data   = "train_test_data/t10k-images-idx3-ubyte";
   char * test_label  = "train_test_data/t10k-labels-idx1-ubyte";
+  BYTE * sample_sets = malloc(sizeof(BYTE)*28*28*10000);
+  BYTE * sample_labels = malloc(sizeof(BYTE)*10000);
+  read_in_data(test_data, sample_sets, 28*28*10000);
+  read_in_labels(test_label, sample_labels, 10000);
   
-  int index = 0;
-  int current_label = 0;
-  
+  float accum_cost = 0;
   matrix * accum_num = new_matrix(10,1);
   matrix * accum_est = new_matrix(10,1);
   matrix * expected  = new_matrix(10,1);
-  matrix * estimate  = new_matrix(10,1);
-  matrix * norm_set  = new_matrix(28*28,1);
-  matrix * image     = new_matrix(28*28,1);
+  
   
   int i;
   for(i = 0; i < 10000; i++){
     
-    current_label = estimate_index( i);
-    make_expected(expected, current_label);
+    matrix * estimate = estimate_index(expected, sample_sets, sample_labels, i);
+    accum_cost += calc_cost(expected, estimate);
     
-    hadamard_matrix(estimate, ACTIVATIONS->set[total_layers], expected);
+    matrix * estimate_zoomed = hadamard_matrix(estimate, expected);
     
     int k;
     for(k = 0; k < 10; k++){
       accum_num->data[k] = accum_num->data[k] + expected->data[k];
-      accum_est->data[k] = accum_est->data[k] + estimate->data[k];
+      accum_est->data[k] = accum_est->data[k] + estimate_zoomed->data[k];
     }
+    free_matrix(estimate);
+    free_matrix(estimate_zoomed);
   }
-  free_matrix(norm_set);
-  free_matrix(image);
+  
+  matrix * results = new_matrix(11,1);
+  for(i = 0; i < 10; i++){
+    results->data[i] = accum_est->data[i] / accum_num->data[i];
+  }
+  results->data[10] = accum_cost / 10000.0;
+  print_matrix(results);
+  
+  free_matrix(accum_num);
+  free_matrix(accum_est);
   free_matrix(expected);
-  free_matrix(estimate);
   
-  for(i = 0; i < 10; i++){
-    accum_est->data[i] = accum_est->data[i] / accum_num->data[i];
-  }
-  print_matrix(accum_est);
+  free(sample_sets);
+  free(sample_labels);
   
-  for(i = 0; i < 10; i++){
-    matrix * image = malloc(sizeof(matrix));
-    //imageread(test_data, image, i);
-    current_label = labelread(test_label, i);
-    
-    if(i == 8){
-      //imagewrite("example.pgm", image);
-    }
-    
-    
-    classify_image(norm_set);
-    
-    printf("%d\n",(int)current_label);
-    print_matrix(ACTIVATIONS->set[total_layers]);
-    
-    free_matrix(norm_set);
-    free_matrix(image);
-  }
-  
-  
+  return results;
 }
 
 
-void train_network(float learning_rate, int total_layers){
+void epoch_network(float learning_rate, int total_layers, int batch_size){
   char * train_data  = "train_test_data/train-images-idx3-ubyte";
   char * train_label = "train_test_data/train-labels-idx1-ubyte";
+  BYTE * sample_sets = malloc(sizeof(BYTE)*28*28*60000);
+  BYTE * sample_labels = malloc(sizeof(BYTE)*60000);
+  read_in_data(train_data, sample_sets, 28*28*60000);
+  read_in_labels(train_label, sample_labels, 60000);
   
-  char current_label = 0;
-  float adj_rate = learning_rate;
-  adj_rate = adj_rate / 20.0;
+  float adj_rate = learning_rate / ((float) batch_size);
+  matrix * expected  = new_matrix(10,1);
   
-  int i, index;
-  for(i = 0; i < 160000; i++){
+  int i;
+  for(i = 0; i < 60000; i++){
     
-    index = (int)floor((((float)rand())/RAND_MAX) * 60000.0);
+    int index = (int)floor((((float)rand())/RAND_MAX) * 60000.0);
+    //matrix * estimate = estimate_index(expected, sample_sets, sample_labels, index);
+    matrix * estimate = estimate_index(expected, sample_sets, sample_labels, i);
     
-    //imageread(train_data, image, index);
-    current_label = labelread(train_label, index);
-    
-    make_expected(expected, (int)current_label);
-    
-    classify_image(norm_set);
     back_propogate(expected);
-    if((i % 20) == 19){
+    
+    if((i % batch_size) == (batch_size - 1)){
       train(total_layers, adj_rate);
     }
-    
-    free_matrix(expected);
+    free_matrix(estimate);
   }
   
+  free_matrix(expected);
+  free(sample_sets);
+  free(sample_labels);
 }
 
 
 int main(int argc, char *argv[]){  
   
-  int total_layers = atoi(argv[1]);
-  int neurons_per_layer = atoi(argv[2]);
-  float learning_rate = atof(argv[3]);
+  FILE *iFile = fopen("test_data.txt","w");
+  if(iFile==0) return 1; 
   
+  int total_layers[4] = {1, 2, 3, 4};
+  int neurons_per_layer[5] = {20, 40, 60, 80, 100};
+  float learning_rate[6] = {2, 1, .2, .1, .05, .01};
+  int number_of_epochs = 25;
+  int size_of_batches[5] = {20, 40, 60, 80, 100};
   
-  setup_network(28*28,total_layers-1,neurons_per_layer,10);
-  printf("Network setup\n");
+  for(int k = 0; k < 4; k++){
+    for(int h = 0; h < 5; h++){
+      for(int j = 0; j < 6; j++){
+        for(int l = 0; l < 5; l++){
+          setup_network(28*28,total_layers[k],neurons_per_layer[h],10);
+          printf("Network setup\n");
+          fprintf(iFile, "----------------------------------------------------------------------------------------\n");
+          fprintf(iFile, "-- %d Total Layers, %d Hidden Neurons/Layer, %d Batch size, %f Learning Rate\n", total_layers[k], neurons_per_layer[h], size_of_batches[l], learning_rate[j]);
+          fprintf(iFile, "----------------------------------------------------------------------------------------\n");
+          for(int i = 0; i < number_of_epochs; i++){
+            // Write pgm header
+            fprintf(iFile, "Epoch %d\n",i);
+            
+            epoch_network(learning_rate[j], total_layers[k], size_of_batches[l]);
+            fprint_matrix(iFile, eval_network(total_layers[k]));
+          }
+          
+          free_network();
+        }
+      }
+    }
+  }
   
-  train_network(learning_rate, total_layers);
-  eval_network(total_layers);
+  fprintf(iFile, "\n\nAll done!\n\n");
+  fclose(iFile);
   
   printf("Done\n");
-  return 0;
-  
+  return 0;  
 }
 
 
