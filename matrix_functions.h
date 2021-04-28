@@ -8,8 +8,10 @@
 #include <string.h>
 #include <math.h>
 
+// I dont want to have to keep typing out unsigned char
 typedef unsigned char BYTE;
 
+// Structs for matrixes, I dont want to have to apass sizes manualy 
 typedef struct matrix {
   int row_cnt;
   int col_cnt;
@@ -29,15 +31,15 @@ matrix_set * new_matrix_set(int size_of_set);
 void free_matrix(matrix * oldmatrix);
 void free_matrix_set(matrix_set * oldmatrix_set);
 
-// Matrix operation functions
+// Dual Matrix operation functions
 matrix * sum_matrix(matrix * matrix_a, matrix * matrix_b);
 matrix * dif_matrix(matrix * matrix_a, matrix * matrix_b);
 matrix * mult_matrix(matrix * matrix_a, matrix * matrix_b);
 matrix * hadamard_matrix(matrix * matrix_a, matrix * matrix_b);
+
+// Single matrix operation functions
 matrix * scale_matrix(matrix * matrix_a, float scalar);
 matrix * transpose_matrix(matrix * matrix_a);
-
-// These are here because I dont think they quite belong in either specific group
 matrix * sigmoid_matrix(matrix * matrix_a);
 matrix * sig_deriv_matrix(matrix * matrix_a);
 matrix * ReLU_matrix(matrix * matrix_a);

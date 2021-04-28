@@ -11,11 +11,12 @@ Please run make to build the executeables, if you get an error run "make clean"
 first.
 
 Then run the following:
--- This executeable just sobel filters an image
-./test_nets <number of layers> <nodes per layer> <training/learning rate>
+-- This executeable just sweeps through many neural net parameters on the MNIST
+   dataset
+   
+Run as:
+./test_nets 
 
-<number of layers>       - Number of layers including output, 4 seems to be to large
-<nodes per layer>        - Nodes per hidden layer, 90 seems to be a sweet spot
-<training/learning rate> - Scalar for gradient application to W/B, 3 works ok
-
+Recomended: edit the sweep ranges, the trials themselves can be quite lengthy,
+            and there are a lot of them being run
 

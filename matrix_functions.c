@@ -5,6 +5,8 @@
 #include "matrix_functions.h"
 
 // Matrix functions
+
+// Matrix constructor, initialized to all 0's
 matrix * new_matrix(int row_cnt, int col_cnt){
   matrix * new_mat = malloc(sizeof(matrix));
   new_mat->row_cnt = row_cnt;
@@ -13,6 +15,7 @@ matrix * new_matrix(int row_cnt, int col_cnt){
   return new_mat;
 }
 
+// Matrix constructor, initialized to a constant
 matrix * const_matrix(int row_cnt, int col_cnt, float constant){
   matrix * new_mat = malloc(sizeof(matrix));
   new_mat->row_cnt = row_cnt;
@@ -25,6 +28,7 @@ matrix * const_matrix(int row_cnt, int col_cnt, float constant){
   return new_mat;
 }
 
+// Matrix constructor, initialized to a random value in [-range, range]
 matrix * rand_matrix(int row_cnt, int col_cnt, float range){
   int i;
   matrix * new_mat = malloc(sizeof(matrix));
@@ -39,6 +43,7 @@ matrix * rand_matrix(int row_cnt, int col_cnt, float range){
   return new_mat;
 }
 
+// Constructor for a matrix set, matrixes themselves not constructed
 matrix_set * new_matrix_set(int size_of_set){
   matrix_set * new_set = malloc(sizeof(matrix_set));
   new_set->number_of_matrices = size_of_set;
@@ -46,11 +51,13 @@ matrix_set * new_matrix_set(int size_of_set){
   return new_set;
 }
 
+// Destructor for a matrix
 void free_matrix(matrix * oldmatrix){
   free(oldmatrix->data);
   free(oldmatrix);
 }
 
+// Destructor for a matrix set
 void free_matrix_set(matrix_set * oldmatrix_set){
   int i = 0;
   for(i = 0; i < oldmatrix_set->number_of_matrices; i++){
@@ -59,6 +66,15 @@ void free_matrix_set(matrix_set * oldmatrix_set){
   free(oldmatrix_set);
 }
 
+
+
+// Almost all of the following functions dynamically allocat memory for their output
+// This is not best practice in C, as it requires thought to not have memory leaks
+// I tried to fix this but got lost and ran out of time. c'est la vie
+
+
+// Takes two matrices of equal size and elementwise sums them
+// A + B = C
 matrix * sum_matrix(matrix * matrix_a, matrix * matrix_b){
   int i;
   if (matrix_a->col_cnt == matrix_b->col_cnt){
@@ -77,6 +93,8 @@ matrix * sum_matrix(matrix * matrix_a, matrix * matrix_b){
   return 0;
 }
 
+// Similar to sum, except the elementwise difference
+// A - B = C
 matrix * dif_matrix(matrix * matrix_a, matrix * matrix_b){
   int i;
   if (matrix_a->col_cnt == matrix_b->col_cnt){
@@ -95,6 +113,8 @@ matrix * dif_matrix(matrix * matrix_a, matrix * matrix_b){
   return 0;
 }
 
+// This is a matrix multiplication, make sure your dimensions are correct
+// A * B = C
 matrix * mult_matrix(matrix * matrix_a, matrix * matrix_b){ 
   //printf("%d %d\n", matrix_a->row_cnt, matrix_a->col_cnt);
   //printf("%d %d\n\n", matrix_b->row_cnt, matrix_b->col_cnt);
@@ -119,6 +139,8 @@ matrix * mult_matrix(matrix * matrix_a, matrix * matrix_b){
   return 0;
 }
 
+// This is a elementwise multiplication of two same-size matrices
+// Hadamard product
 matrix * hadamard_matrix(matrix * matrix_a, matrix * matrix_b){ 
   int i;
   if (matrix_a->col_cnt == matrix_b->col_cnt){
@@ -137,6 +159,11 @@ matrix * hadamard_matrix(matrix * matrix_a, matrix * matrix_b){
   return 0;
 }
 
+
+// Single matrix functions
+
+
+// Scales matrix by scalar
 matrix * scale_matrix(matrix * matrix_a, float scalar){
   int i;
   matrix * result = new_matrix(matrix_a->row_cnt, matrix_a->col_cnt);
@@ -146,6 +173,7 @@ matrix * scale_matrix(matrix * matrix_a, float scalar){
   return result;
 }
 
+// Returns the transpose of the matrix
 matrix * transpose_matrix(matrix * matrix_a){
   int i, row, col;
   matrix * result = new_matrix(matrix_a->col_cnt, matrix_a->row_cnt);
@@ -159,7 +187,7 @@ matrix * transpose_matrix(matrix * matrix_a){
   return result;
 }
 
-// These are here because I dont think they quite belong in the net specific group
+// Returns the element-wize sigmoid function of the matrix
 matrix * sigmoid_matrix(matrix * matrix_a){
   matrix * result = new_matrix(matrix_a->row_cnt, matrix_a->col_cnt);
   
@@ -170,6 +198,7 @@ matrix * sigmoid_matrix(matrix * matrix_a){
   return result;
 }
 
+// Returns the element-wize sigmoid-derivative function of the matrix
 matrix * sig_deriv_matrix(matrix * matrix_a){
   matrix * result = new_matrix(matrix_a->row_cnt, matrix_a->col_cnt);
   
@@ -182,6 +211,7 @@ matrix * sig_deriv_matrix(matrix * matrix_a){
   return result;
 }
 
+// Returns the element-wize Rectifying Linear Unit function of the matrix
 matrix * ReLU_matrix(matrix * matrix_a){
   matrix * result = new_matrix(matrix_a->row_cnt, matrix_a->col_cnt);
   
@@ -196,6 +226,7 @@ matrix * ReLU_matrix(matrix * matrix_a){
   return result;
 }
 
+// Returns the element-wize Rectifying Linear Unit derivative function of the matrix
 matrix * ReLU_deriv_matrix(matrix * matrix_a){
   matrix * result = new_matrix(matrix_a->row_cnt, matrix_a->col_cnt);
   
@@ -210,6 +241,8 @@ matrix * ReLU_deriv_matrix(matrix * matrix_a){
   return result;
 }
 
+
+// These functions print a bracketed matrix to a file or to the console
 void print_matrix(matrix * matrix_a){
   int row, col;
   
