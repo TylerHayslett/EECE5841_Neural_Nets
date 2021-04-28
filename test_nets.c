@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "common.h"
 #include "matrix_functions.h"
 #include "neural_net.h"
 
@@ -144,7 +143,8 @@ void epoch_network(float learning_rate, int total_layers, int batch_size){
   int i;
   for(i = 0; i < 60000; i++){
     
-    int index = (int)floor((((float)rand())/RAND_MAX) * 60000.0);
+    // Randomizing samples doess not have a dramatic edffect on accuracy
+    //int index = (int)floor((((float)rand())/RAND_MAX) * 60000.0);
     //matrix * estimate = estimate_index(expected, sample_sets, sample_labels, index);
     matrix * estimate = estimate_index(expected, sample_sets, sample_labels, i);
     
